@@ -17,6 +17,7 @@ include <uapi/linux/lwtunnel.h>
 include <uapi/linux/neighbour.h>
 include <uapi/linux/fib_rules.h>
 include <uapi/linux/if_tunnel.h>
+include <uapi/linux/if_bridge.h>
 include <uapi/linux/net_namespace.h>
 include <uapi/linux/veth.h>
 include <uapi/linux/can/gw.h>
@@ -92,6 +93,9 @@ netlink_msg_route [
 	bridge_getlink		netlink_msg[RTM_GETLINK, ifinfomsg[AF_BRIDGE], ifla_policy]
 	bridge_setlink		netlink_msg[RTM_SETLINK, ifinfomsg[AF_BRIDGE], ifla_policy]
 	bridge_dellink		netlink_msg[RTM_DELLINK, ifinfomsg[AF_BRIDGE], ifla_policy]
+	bridge_getvlan		netlink_msg[RTM_GETVLAN, ifinfomsg[AF_BRIDGE], br_vlan_db_dump_pol]
+	bridge_newvlan		netlink_msg[RTM_NEWVLAN, ifinfomsg[AF_BRIDGE], br_vlan_db_policy]
+	bridge_delvlan		netlink_msg[RTM_DELVLAN, ifinfomsg[AF_BRIDGE], br_vlan_db_policy]
 
 	RTM_NEWNSID		netlink_msg[RTM_NEWNSID, rtgenmsg[AF_UNSPEC], rtnl_net_policy]
 	RTM_GETNSID		netlink_msg[RTM_GETNSID, rtgenmsg[AF_UNSPEC], rtnl_net_policy]
@@ -99,6 +103,27 @@ netlink_msg_route [
 	can_newroute		netlink_msg[RTM_NEWROUTE, rtcanmsg, cgw_policy]
 	can_delroute		netlink_msg[RTM_DELROUTE, rtcanmsg, cgw_policy]
 ] [varlen]
+
+br_vlan_db_dump_pol [
+	BRIDGE_VLANDB_DUMP_FLAGS	nlattr[BRIDGE_VLANDB_DUMP_FLAGS, int32]
+]
+
+br_vlan_db_policy [
+	BRIDGE_VLANDB_ENTRY_INFO	nlattr[BRIDGE_VLANDB_ENTRY_INFO, bridge_vlan_info]
+	BRIDGE_VLANDB_ENTRY_RANGE	nlattr[BRIDGE_VLANDB_ENTRY_RANGE, int16]
+	BRIDGE_VLANDB_ENTRY_STATE	nlattr[BRIDGE_VLANDB_ENTRY_STATE, int8]
+	BRIDGE_VLANDB_ENTRY_TUNNEL_INFO	nlnest[BRIDGE_VLANDB_ENTRY_TUNNEL_INFO, array[br_vlandb_tinfo_pol]]
+] [varlen]
+
+bridge_vlan_info {
+	flags	int16
+	vid	int16
+}
+
+br_vlandb_tinfo_pol [
+	BRIDGE_VLANDB_TINFO_ID	nlattr[BRIDGE_VLANDB_TINFO_ID, int32]
+	BRIDGE_VLANDB_TINFO_CMD	nlattr[BRIDGE_VLANDB_TINFO_CMD, int32]
+]
 
 type rtgenmsg[FAMILY] {
 	rtgen_family	const[FAMILY, int8]
