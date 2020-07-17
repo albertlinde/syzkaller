@@ -101,6 +101,10 @@ netlink_msg_route [
 	bridge_newvlan		netlink_msg[RTM_NEWVLAN, ifinfomsg[AF_BRIDGE], br_vlan_db_policy]
 	bridge_delvlan		netlink_msg[RTM_DELVLAN, ifinfomsg[AF_BRIDGE], br_vlan_db_policy]
 
+	RTM_GETMDB		netlink_msg[RTM_GETMDB, ifinfomsg[AF_BRIDGE], void]
+	RTM_NEWMDB		netlink_msg[RTM_NEWMDB, ifinfomsg[AF_BRIDGE], br_mdb_policy]
+	RTM_DELMDB		netlink_msg[RTM_DELMDB, ifinfomsg[AF_BRIDGE], br_mdb_policy]
+
 	RTM_NEWNSID		netlink_msg[RTM_NEWNSID, rtgenmsg[AF_UNSPEC], rtnl_net_policy]
 	RTM_GETNSID		netlink_msg[RTM_GETNSID, rtgenmsg[AF_UNSPEC], rtnl_net_policy]
 
@@ -145,6 +149,73 @@ br_vlandb_tinfo_pol [
 	BRIDGE_VLANDB_TINFO_ID	nlattr[BRIDGE_VLANDB_TINFO_ID, int32]
 	BRIDGE_VLANDB_TINFO_CMD	nlattr[BRIDGE_VLANDB_TINFO_CMD, int32]
 ]
+
+br_mdb_policy [
+	MDBA_SET_ENTRY	nlattr[MDBA_SET_ENTRY, br_mdb_entry]
+]
+
+br_mdb_entry {
+	ifindex	int32
+	state	int8
+	flags	flags[br_mdb_entry_flags, int8]
+	vid	br_mdb_entry_sub
+}
+
+br_mdb_entry_flags = MDB_FLAGS_OFFLOAD, MDB_FLAGS_FAST_LEAVE
+
+br_mdb_entry_sub {
+	u	br_mdb_entry_sub_u
+	proto	int16be
+}
+
+br_mdb_entry_sub_u [
+	ip4		int32be
+	in6_addr	in6_addr
+]
+
+# TODO: these probably exist already! CHECK
+in6_addr [
+#TODO: int8be.
+	u8	int8
+	be16	int16be
+	be32	int32be
+]
+
+#struct in6_addr {
+#	union {
+#		__u8		u6_addr8[16];
+#if __UAPI_DEF_IN6_ADDR_ALT
+#		__be16		u6_addr16[8];
+#		__be32		u6_addr32[4];
+#endif
+#	} in6_u;
+#define s6_addr			in6_u.u6_addr8
+#if __UAPI_DEF_IN6_ADDR_ALT
+#define s6_addr16		in6_u.u6_addr16
+#define s6_addr32		in6_u.u6_addr32
+#endif
+#};
+
+#FOR MDB:
+
+# IN tb[MDBA_SET_ENTRY] after nlmsg_parse_deprecated
+#struct br_mdb_entry {
+#	__u32 ifindex;
+#define MDB_TEMPORARY 0
+#define MDB_PERMANENT 1
+#	__u8 state;
+#define MDB_FLAGS_OFFLOAD	(1 << 0)
+#define MDB_FLAGS_FAST_LEAVE	(1 << 1)
+#	__u8 flags;
+#	__u16 vid;
+#	struct {
+#		union {
+#			__be32	ip4;
+#			struct in6_addr ip6;
+#		} u;
+#		__be16		proto;
+#	} addr;
+#};
 
 type rtgenmsg[FAMILY] {
 	rtgen_family	const[FAMILY, int8]
