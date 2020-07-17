@@ -18,6 +18,7 @@ include <uapi/linux/neighbour.h>
 include <uapi/linux/fib_rules.h>
 include <uapi/linux/if_tunnel.h>
 include <uapi/linux/if_bridge.h>
+include <uapi/linux/nexthop.h>
 include <uapi/linux/net_namespace.h>
 include <uapi/linux/veth.h>
 include <uapi/linux/can/gw.h>
@@ -60,6 +61,9 @@ netlink_msg_route [
 	ipv4_newrule		netlink_msg[RTM_NEWRULE, fib_rule_hdr[AF_INET], fib4_rule_policy]
 	ipv4_delrule		netlink_msg[RTM_DELRULE, fib_rule_hdr[AF_INET], fib4_rule_policy]
 	ipv4_getrule		netlink_msg[RTM_GETRULE, fib_rule_hdr[AF_INET], void]
+	ipv4_new_nexthop	netlink_msg[RTM_NEWNEXTHOP, ifaddrmsg[AF_INET], rtm_nh_policy]
+	ipv4_del_nexthop	netlink_msg[RTM_DELNEXTHOP, ifaddrmsg[AF_INET], rtm_nh_policy]
+	ipv4_get_nexthop	netlink_msg[RTM_GETNEXTHOP, ifaddrmsg[AF_INET], rtm_nh_policy]
 
 	ipv6_newaddr		netlink_msg[RTM_NEWADDR, ifaddrmsg[AF_INET6], ifa_ipv6_policy]
 	ipv6_deladdr		netlink_msg[RTM_DELADDR, ifaddrmsg[AF_INET6], ifa_ipv6_policy]
@@ -102,6 +106,23 @@ netlink_msg_route [
 
 	can_newroute		netlink_msg[RTM_NEWROUTE, rtcanmsg, cgw_policy]
 	can_delroute		netlink_msg[RTM_DELROUTE, rtcanmsg, cgw_policy]
+] [varlen]
+
+rtm_nh_policy [
+	NHA_ID		nlattr[NHA_ID, int32]
+	NHA_GROUP	nlattr[NHA_GROUP, array[int16]]
+	NHA_GROUP_TYPE	nlattr[NHA_GROUP_TYPE, int16]
+	NHA_BLACKHOLE	nlattr[NHA_BLACKHOLE, void]
+	NHA_OIF		nlattr[NHA_OIF, int32]
+	NHA_GATEWAY	nlattr[NHA_GATEWAY, array[int16]]
+	NHA_ENCAP_TYPE	nlattr[NHA_ENCAP_TYPE, int16]
+	NHA_ENCAP	nlattr[NHA_ENCAP, void]
+#TODO WAIT FOR https://github.com/google/syzkaller/pull/1925
+# Seems like the lwwtunnel_stuff is being worked on by ruxandra.
+# NHA_ENCAP	nlnest[NHA_ENCAP, lwtunnel_policy] should work then.
+	NHA_GROUPS	nlattr[NHA_GROUPS, void]
+	NHA_MASTER	nlattr[NHA_MASTER, int32]
+	NHA_FDB		nlattr[NHA_FDB, void]
 ] [varlen]
 
 br_vlan_db_dump_pol [
