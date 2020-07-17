@@ -73,6 +73,10 @@ netlink_msg_route [
 	ipv6_delrule		netlink_msg[RTM_DELRULE, fib_rule_hdr[AF_INET6], fib6_rule_policy]
 	ipv6_getrule		netlink_msg[RTM_GETRULE, fib_rule_hdr[AF_INET6], void]
 
+	ipv6_newaddrlabel	netlink_msg[RTM_NEWADDRLABEL, fib_rule_hdr[AF_INET6], rtm_ipv6_policy]
+	ipv6_deladdrlabel	netlink_msg[RTM_DELADDRLABEL, fib_rule_hdr[AF_INET6], rtm_ipv6_policy]
+	ipv6_getaddrlabel	netlink_msg[RTM_GETADDRLABEL, fib_rule_hdr[AF_INET6], rtm_ipv6_policy]
+
 	ipmr_newroute		netlink_msg[RTM_NEWROUTE, rtmsg[RTNL_FAMILY_IPMR], rtm_ipv4_policy]
 	ipmr_delroute		netlink_msg[RTM_DELROUTE, rtmsg[RTNL_FAMILY_IPMR], rtm_ipv4_policy]
 	ipmr_getroute		netlink_msg[RTM_GETROUTE, rtmsg[RTNL_FAMILY_IPMR], void]
