@@ -1,0 +1,171 @@
+
+include <uapi/linux/dcbnl.h>
+
+sendmsg$nl_dcb(fd sock_nl_route, msg ptr[in, msghdr_netlink[netlink_msg_dcb]], f flags[send_flags])
+
+netlink_msg_dcb [
+	RTM_GETDCB	netlink_msg[RTM_GETDCB, ifinfomsg[AF_UNSPEC], dcbnl_rtnl_policy]
+	RTM_SETDCB	netlink_msg[RTM_SETDCB, ifinfomsg[AF_UNSPEC], dcbnl_rtnl_policy]
+] [varlen]
+
+dcbnl_rtnl_policy [
+#TODO (IFNAME!)
+	DCB_ATTR_IFNAME		nlattr[DCB_ATTR_IFNAME, string[nldev_name]]
+	DCB_ATTR_STATE		nlattr[DCB_ATTR_STATE, int8]
+	DCB_ATTR_PFC_CFG	nlnest[DCB_ATTR_PFC_CFG, array[dcbnl_pfc_up_nest]]
+	DCB_ATTR_PG_CFG		nlnest[DCB_ATTR_PG_CFG, array[dcbnl_pg_nest]]
+	DCB_ATTR_SET_ALL	nlattr[DCB_ATTR_SET_ALL, int8]
+	DCB_ATTR_PERM_HWADDR	nlattr[DCB_ATTR_PERM_HWADDR, void]
+	DCB_ATTR_CAP		nlnest[DCB_ATTR_CAP, array[dcbnl_numtcs_nest]]
+	DCB_ATTR_PFC_STATE	nlattr[DCB_ATTR_PFC_STATE, int8]
+	DCB_ATTR_BCN		nlnest[DCB_ATTR_BCN, array[dcbnl_bcn_nest]]
+	DCB_ATTR_APP		nlnest[DCB_ATTR_APP, array[dcbnl_app_nest]]
+	DCB_ATTR_IEEE		nlnest[DCB_ATTR_IEEE, array[dcbnl_ieee_policy]]
+	DCB_ATTR_DCBX		nlattr[DCB_ATTR_DCBX, int8]
+	DCB_ATTR_FEATCFG	nlnest[DCB_ATTR_FEATCFG, array[dcbnl_featcfg_nest]]
+] [varlen]
+
+dcbnl_pg_nest [
+#DCB_PG_ATTR_MAX + 1 = {
+	DCB_PG_ATTR_TC_0	nlnest[DCB_PG_ATTR_TC_0, array[dcbnl_tc_param_nest]]
+	DCB_PG_ATTR_TC_1	nlnest[DCB_PG_ATTR_TC_1, array[dcbnl_tc_param_nest]]
+	DCB_PG_ATTR_TC_2	nlnest[DCB_PG_ATTR_TC_2, array[dcbnl_tc_param_nest]]
+	DCB_PG_ATTR_TC_3	nlnest[DCB_PG_ATTR_TC_3, array[dcbnl_tc_param_nest]]
+	DCB_PG_ATTR_TC_4	nlnest[DCB_PG_ATTR_TC_4, array[dcbnl_tc_param_nest]]
+	DCB_PG_ATTR_TC_5	nlnest[DCB_PG_ATTR_TC_5, array[dcbnl_tc_param_nest]]
+	DCB_PG_ATTR_TC_6	nlnest[DCB_PG_ATTR_TC_6, array[dcbnl_tc_param_nest]]
+	DCB_PG_ATTR_TC_7	nlnest[DCB_PG_ATTR_TC_7, array[dcbnl_tc_param_nest]]
+	DCB_PG_ATTR_TC_ALL	nlnest[DCB_PG_ATTR_TC_ALL, array[dcbnl_tc_param_nest]]
+	DCB_PG_ATTR_BW_ID_0	nlattr[DCB_PG_ATTR_BW_ID_0, int8]
+	DCB_PG_ATTR_BW_ID_1	nlattr[DCB_PG_ATTR_BW_ID_1, int8]
+	DCB_PG_ATTR_BW_ID_2	nlattr[DCB_PG_ATTR_BW_ID_2, int8]
+	DCB_PG_ATTR_BW_ID_3	nlattr[DCB_PG_ATTR_BW_ID_3, int8]
+	DCB_PG_ATTR_BW_ID_4	nlattr[DCB_PG_ATTR_BW_ID_4, int8]
+	DCB_PG_ATTR_BW_ID_5	nlattr[DCB_PG_ATTR_BW_ID_5, int8]
+	DCB_PG_ATTR_BW_ID_6	nlattr[DCB_PG_ATTR_BW_ID_6, int8]
+	DCB_PG_ATTR_BW_ID_7	nlattr[DCB_PG_ATTR_BW_ID_7, int8]
+	DCB_PG_ATTR_BW_ID_ALL	nlattr[DCB_PG_ATTR_BW_ID_ALL, void]
+] [varlen]
+
+dcbnl_bcn_nest [
+#DCB_BCN_ATTR_MAX + 1 = {
+	DCB_BCN_ATTR_RP_0	nlattr[DCB_BCN_ATTR_RP_0, int8]
+	DCB_BCN_ATTR_RP_1	nlattr[DCB_BCN_ATTR_RP_1, int8]
+	DCB_BCN_ATTR_RP_2	nlattr[DCB_BCN_ATTR_RP_2, int8]
+	DCB_BCN_ATTR_RP_3	nlattr[DCB_BCN_ATTR_RP_3, int8]
+	DCB_BCN_ATTR_RP_4	nlattr[DCB_BCN_ATTR_RP_4, int8]
+	DCB_BCN_ATTR_RP_5	nlattr[DCB_BCN_ATTR_RP_5, int8]
+	DCB_BCN_ATTR_RP_6	nlattr[DCB_BCN_ATTR_RP_6, int8]
+	DCB_BCN_ATTR_RP_7	nlattr[DCB_BCN_ATTR_RP_7, int8]
+	DCB_BCN_ATTR_RP_ALL	nlattr[DCB_BCN_ATTR_RP_ALL, void]
+	DCB_BCN_ATTR_BCNA_0	nlattr[DCB_BCN_ATTR_BCNA_0, int32]
+	DCB_BCN_ATTR_BCNA_1	nlattr[DCB_BCN_ATTR_BCNA_1, int32]
+	DCB_BCN_ATTR_ALPHA	nlattr[DCB_BCN_ATTR_ALPHA, int32]
+	DCB_BCN_ATTR_BETA	nlattr[DCB_BCN_ATTR_BETA, int32]
+	DCB_BCN_ATTR_GD		nlattr[DCB_BCN_ATTR_GD, int32]
+	DCB_BCN_ATTR_GI		nlattr[DCB_BCN_ATTR_GI, int32]
+	DCB_BCN_ATTR_TMAX	nlattr[DCB_BCN_ATTR_TMAX, int32]
+	DCB_BCN_ATTR_TD		nlattr[DCB_BCN_ATTR_TD, int32]
+	DCB_BCN_ATTR_RMIN	nlattr[DCB_BCN_ATTR_RMIN, int32]
+	DCB_BCN_ATTR_W		nlattr[DCB_BCN_ATTR_W, int32]
+	DCB_BCN_ATTR_RD		nlattr[DCB_BCN_ATTR_RD, int32]
+	DCB_BCN_ATTR_RU		nlattr[DCB_BCN_ATTR_RU, int32]
+	DCB_BCN_ATTR_WRTT	nlattr[DCB_BCN_ATTR_WRTT, int32]
+	DCB_BCN_ATTR_RI		nlattr[DCB_BCN_ATTR_RI, int32]
+	DCB_BCN_ATTR_C		nlattr[DCB_BCN_ATTR_C, int32]
+	DCB_BCN_ATTR_ALL	nlattr[DCB_BCN_ATTR_ALL, void]
+] [varlen]
+
+dcbnl_tc_param_nest [
+#DCB_TC_ATTR_PARAM_MAX + 1 = {
+	DCB_TC_ATTR_PARAM_PGID		nlattr[DCB_TC_ATTR_PARAM_PGID, int8]
+	DCB_TC_ATTR_PARAM_UP_MAPPING	nlattr[DCB_TC_ATTR_PARAM_UP_MAPPING, int8]
+	DCB_TC_ATTR_PARAM_STRICT_PRIO	nlattr[DCB_TC_ATTR_PARAM_STRICT_PRIO, int8]
+	DCB_TC_ATTR_PARAM_BW_PCT	nlattr[DCB_TC_ATTR_PARAM_BW_PCT, int8]
+	DCB_TC_ATTR_PARAM_ALL		nlattr[DCB_TC_ATTR_PARAM_ALL, void]
+] [varlen]
+
+dcbnl_numtcs_nest [
+#DCB_NUMTCS_ATTR_MAX + 1 = {
+	DCB_NUMTCS_ATTR_ALL	nlattr[DCB_NUMTCS_ATTR_ALL, void]
+	DCB_NUMTCS_ATTR_PG	nlattr[DCB_NUMTCS_ATTR_PG, int8]
+	DCB_NUMTCS_ATTR_PFC	nlattr[DCB_NUMTCS_ATTR_PFC, int8]
+] [varlen]
+
+#dcbnl_cap_nest [
+#DCB_CAP_ATTR_MAX + 1 = {
+#	DCB_CAP_ATTR_ALL	nlattr[DCB_CAP_ATTR_ALL, void]
+#	DCB_CAP_ATTR_PG		nlattr[DCB_CAP_ATTR_PG, int8]
+#	DCB_CAP_ATTR_PFC	nlattr[DCB_CAP_ATTR_PFC, int8]
+#	DCB_CAP_ATTR_UP2TC	nlattr[DCB_CAP_ATTR_UP2TC, int8]
+#	DCB_CAP_ATTR_PG_TCS	nlattr[DCB_CAP_ATTR_PG_TCS, int8]
+#	DCB_CAP_ATTR_PFC_TCS nlattr[DCB_CAP_ATTR_PFC_TCS, int8]
+#	DCB_CAP_ATTR_GSP	nlattr[DCB_CAP_ATTR_GSP, int8]
+#	DCB_CAP_ATTR_BCN	nlattr[DCB_CAP_ATTR_BCN, int8]
+#	DCB_CAP_ATTR_DCBX	nlattr[DCB_CAP_ATTR_DCBX, int8]
+#] [varlen]
+
+dcbnl_pfc_up_nest [
+#DCB_PFC_UP_ATTR_MAX + 1 = {
+	DCB_PFC_UP_ATTR_0	nlattr[DCB_PFC_UP_ATTR_0, int8]
+	DCB_PFC_UP_ATTR_1	nlattr[DCB_PFC_UP_ATTR_1, int8]
+	DCB_PFC_UP_ATTR_2	nlattr[DCB_PFC_UP_ATTR_2, int8]
+	DCB_PFC_UP_ATTR_3	nlattr[DCB_PFC_UP_ATTR_3, int8]
+	DCB_PFC_UP_ATTR_4	nlattr[DCB_PFC_UP_ATTR_4, int8]
+	DCB_PFC_UP_ATTR_5	nlattr[DCB_PFC_UP_ATTR_5, int8]
+	DCB_PFC_UP_ATTR_6	nlattr[DCB_PFC_UP_ATTR_6, int8]
+	DCB_PFC_UP_ATTR_7	nlattr[DCB_PFC_UP_ATTR_7, int8]
+	DCB_PFC_UP_ATTR_ALL	nlattr[DCB_PFC_UP_ATTR_ALL, void]
+] [varlen]
+
+dcbnl_app_nest [
+#DCB_APP_ATTR_MAX + 1 = {
+	DCB_APP_ATTR_IDTYPE	nlattr[DCB_APP_ATTR_IDTYPE, int8]
+	DCB_APP_ATTR_ID		nlattr[DCB_APP_ATTR_ID, int16]
+	DCB_APP_ATTR_PRIORITY	nlattr[DCB_APP_ATTR_PRIORITY, int8]
+] [varlen]
+
+dcbnl_ieee_policy [
+	DCB_ATTR_IEEE_ETS	nlattr[DCB_ATTR_IEEE_ETS, void]
+	DCB_ATTR_IEEE_PFC	nlattr[DCB_ATTR_IEEE_PFC, void]
+	DCB_ATTR_IEEE_APP_TABLE	nlattr[DCB_ATTR_IEEE_APP_TABLE, void]
+	DCB_ATTR_IEEE_MAXRATE	nlattr[DCB_ATTR_IEEE_MAXRATE, void]
+	DCB_ATTR_IEEE_QCN	nlattr[DCB_ATTR_IEEE_QCN, void]
+	DCB_ATTR_IEEE_QCN_STATS	nlattr[DCB_ATTR_IEEE_QCN_STATS, void]
+	DCB_ATTR_DCB_BUFFER	nlattr[DCB_ATTR_DCB_BUFFER, void]
+#DCB_ATTR_IEEE_MAX + 1 = {
+#	DCB_ATTR_IEEE_ETS	    = {.len = sizeof(struct ieee_ets)
+#	DCB_ATTR_IEEE_PFC	    = {.len = sizeof(struct ieee_pfc)
+#	DCB_ATTR_IEEE_APP_TABLE   nlnest[DCB_ATTR_IEEE_APP_TABLE, array[PPPPPPPPPPPPP]]
+#enum ieee_attrs_app {
+#	DCB_ATTR_IEEE_APP_UNSPEC,
+#	DCB_ATTR_IEEE_APP,
+#	__DCB_ATTR_IEEE_APP_MAX
+#};
+#	DCB_ATTR_IEEE_MAXRATE   = {.len = sizeof(struct ieee_maxrate)
+#	DCB_ATTR_IEEE_QCN         = {.len = sizeof(struct ieee_qcn)
+#	DCB_ATTR_IEEE_QCN_STATS   = {.len = sizeof(struct ieee_qcn_stats)
+#	DCB_ATTR_DCB_BUFFER       = {.len = sizeof(struct dcbnl_buffer)
+] [varlen]
+
+dcbnl_featcfg_nest [
+#DCB_FEATCFG_ATTR_MAX + 1 = {
+	DCB_FEATCFG_ATTR_ALL	nlattr[DCB_FEATCFG_ATTR_ALL, void]
+	DCB_FEATCFG_ATTR_PG	nlattr[DCB_FEATCFG_ATTR_PG, int8]
+	DCB_FEATCFG_ATTR_PFC	nlattr[DCB_FEATCFG_ATTR_PFC, int8]
+	DCB_FEATCFG_ATTR_APP	nlattr[DCB_FEATCFG_ATTR_APP, int8]
+] [varlen]
+
+#static const struct nla_policy rtm_nh_policy[NHA_MAX + 1] = {
+#	[NHA_ID]		= { .type = NLA_U32 },
+#	[NHA_GROUP]		= { .type = NLA_BINARY },
+#	[NHA_GROUP_TYPE]	= { .type = NLA_U16 },
+#	[NHA_BLACKHOLE]		= { .type = NLA_FLAG },
+#	[NHA_OIF]		= { .type = NLA_U32 },
+#	[NHA_GATEWAY]		= { .type = NLA_BINARY },
+#	[NHA_ENCAP_TYPE]	= { .type = NLA_U16 },
+#	[NHA_ENCAP]		= { .type = NLA_NESTED },
+#	[NHA_GROUPS]		= { .type = NLA_FLAG },
+#	[NHA_MASTER]		= { .type = NLA_U32 },
+#	[NHA_FDB]		= { .type = NLA_FLAG },
+#};
