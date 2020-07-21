@@ -544,12 +544,32 @@ ipv6_addr [
 type ipv6_addr_mask array[flags[ipv4_addr_mask_vals, int32be], 4]
 
 # TODO: Describe more types of headers
-# NEXTHDR_HOP, NEXTHDR_TCP, NEXTHDR_UDP, NEXTHDR_IPV6, NEXTHDR_FRAGMENT, NEXTHDR_GRE, NEXTHDR_ESP, NEXTHDR_AUTH, NEXTHDR_ICMP, NEXTHDR_NONE, NEXTHDR_DEST, NEXTHDR_SCTP, NEXTHDR_MOBILITY
-# https://tools.ietf.org/html/rfc2402
-# https://tools.ietf.org/html/rfc2406
-# https://tools.ietf.org/html/rfc3775
+# Already in ipv6_types, seem covered:
+# NEXTHDR_HOP, NEXTHDR_FRAGMENT, NEXTHDR_GRE, NEXTHDR_ESP, NEXTHDR_AUTH, 
+# NEXTHDR_ICMP, NEXTHDR_NONE, NEXTHDR_DEST, NEXTHDR_MOBILITY
+# NEXTHDR_ROUTING, 
 
-# https://tools.ietf.org/html/rfc2460#section-4
+# Not in ipv6_types yet:
+# NEXTHDR_TCP (but unreachable)
+# NEXTHDR_UDP (but unreachable)
+# NEXTHDR_IPV6 (but unreachable)
+# NEXTHDR_SCTP (but unreachable)
+
+# https://tools.ietf.org/html/rfc2460#section-4.7 No Next Header is missing.
+# But all reachable code already tests for the header nicely.
+
+# https://tools.ietf.org/html/rfc2460#section-4 IPv6 Extension Headers
+#		Hop-by-Hop Options
+#		Routing (Type 0)
+#		Fragment
+#		Destination Options
+# https://tools.ietf.org/html/rfc2402 
+#		IP Authentication
+# https://tools.ietf.org/html/rfc2406
+#		IP Encapsulating Security Payload
+# https://tools.ietf.org/html/rfc3775
+#		Mobility Support
+
 # The length field in each of the extension headers specifies the
 # length of the header in 8-octet units not including the first 8 octets.
 ipv6_ext_header [
@@ -560,6 +580,7 @@ ipv6_ext_header [
 	dstopts		ipv6_dstopts_ext_header
 ] [varlen]
 
+# https://tools.ietf.org/html/rfc2460#section-4.3 Hop-by-Hop Options Header
 ipv6_hopopts_ext_header {
 	next_header	flags[ipv6_types, int8]
 	length		bytesize8[options, int8]
@@ -568,7 +589,11 @@ ipv6_hopopts_ext_header {
 } [packed, align[8]]
 
 ipv6_routing_types = IPV6_SRCRT_STRICT, IPV6_SRCRT_TYPE_0, IPV6_SRCRT_TYPE_2
+# IPV6_SRCRT_TYPE_3 is missing.
+# no point,
+# wont get past https://elixir.bootlin.com/linux/latest/source/net/ipv6/exthdrs.c#L490 anyway.
 
+# https://tools.ietf.org/html/rfc2460#section-4.4 Routing Header
 ipv6_rt_hdr {
 	next_header	flags[ipv6_types, int8]
 	length		bytesize8[data, int8]
@@ -578,6 +603,7 @@ ipv6_rt_hdr {
 	data		array[ipv6_addr]
 } [packed, align[8]]
 
+# https://tools.ietf.org/html/rfc2460#section-4.4 Routing Header
 ipv6_sr_hdr {
 	nexthdr		flags[ipv6_types, int8]
 	hdrlen		bytesize8[segments, int8]
@@ -597,6 +623,7 @@ ipv6_sr_hdr {
 
 ipv6_sr_flags = SR6_FLAG1_PROTECTED, SR6_FLAG1_OAM, SR6_FLAG1_ALERT, SR6_FLAG1_HMAC
 
+https://tools.ietf.org/html/rfc2460#section-4.5  Fragment Header
 ipv6_fragment_ext_header {
 	next_header	flags[ipv6_types, int8]
 	reserved1	const[0, int8]
@@ -607,6 +634,7 @@ ipv6_fragment_ext_header {
 	identification	int32[100:104]
 } [packed, align[8]]
 
+https://tools.ietf.org/html/rfc2460#section-4.6 Destination Options Header
 ipv6_dstopts_ext_header {
 	next_header	flags[ipv6_types, int8]
 	length		bytesize8[options, int8]
@@ -614,6 +642,7 @@ ipv6_dstopts_ext_header {
 	options		array[ipv6_tlv_option]
 } [packed, align[8]]
 
+# https://tools.ietf.org/html/rfc2460#section-4.2 Options
 ipv6_tlv_option [
 	generic	ipv6_tlv_generic
 	pad1	ipv6_tlv_pad1
