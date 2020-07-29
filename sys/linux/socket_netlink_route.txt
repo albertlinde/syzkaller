@@ -16,6 +16,7 @@ include <uapi/linux/netlink.h>
 include <uapi/linux/netconf.h>
 include <uapi/linux/rtnetlink.h>
 include <uapi/linux/lwtunnel.h>
+include <uapi/linux/mrp_bridge.h>
 include <uapi/linux/neighbour.h>
 include <uapi/linux/nexthop.h>
 include <uapi/linux/fib_rules.h>
@@ -258,9 +259,69 @@ ifla_policy [
 ifla_af_spec_policy [
 	AF_INET		nlnest[AF_INET, nlnest[IFLA_INET_CONF, array[nlattr_tt[int16:14[0:IPV4_DEVCONF_MAX], 0, 0, int32]]]]
 	AF_INET6	nlnest[AF_INET6, array[inet6_af_policy]]
-	AF_BRIDGE	nlattr[AF_BRIDGE, void]
+	AF_BRIDGE	nlnest[AF_BRIDGE, ifla_af_spec_policy_bridge]
 	AF_MPLS		nlattr[AF_MPLS, void]
 ] [varlen]
+
+ifla_af_spec_policy_bridge [
+# TODO: didn't add the following two as these are not related to MRP, see net/bridge/br_netlink.c:br_afspec.
+	IFLA_BRIDGE_VLAN_TUNNEL_INFO	nlattr[IFLA_BRIDGE_VLAN_TUNNEL_INFO, void]
+	IFLA_BRIDGE_VLAN_INFO		nlattr[IFLA_BRIDGE_VLAN_INFO, void]
+# https://elixir.bootlin.com/linux/v5.8-rc4/source/net/bridge/br_netlink.c#L676
+	IFLA_BRIDGE_MRP			nlattr[IFLA_BRIDGE_MRP, br_mrp_policy]
+] [varlen]
+
+br_mrp_policy [
+#https://elixir.bootlin.com/linux/v5.8-rc4/source/net/bridge/br_mrp_netlink.c#L238
+	IFLA_BRIDGE_MRP_INSTANCE	nlnest[IFLA_BRIDGE_MRP_INSTANCE, br_mrp_instance_policy]
+	IFLA_BRIDGE_MRP_PORT_STATE	nlnest[IFLA_BRIDGE_MRP_PORT_STATE, br_mrp_port_state_policy]
+	IFLA_BRIDGE_MRP_PORT_ROLE	nlnest[IFLA_BRIDGE_MRP_PORT_ROLE, br_mrp_port_role_policy]
+	IFLA_BRIDGE_MRP_RING_STATE	nlnest[IFLA_BRIDGE_MRP_RING_STATE, br_mrp_ring_state_policy]
+	IFLA_BRIDGE_MRP_RING_ROLE	nlnest[IFLA_BRIDGE_MRP_RING_ROLE, br_mrp_ring_role_policy]
+	IFLA_BRIDGE_MRP_START_TEST	nlnest[IFLA_BRIDGE_MRP_START_TEST, br_mrp_start_test_policy]
+] [varlen]
+
+br_mrp_instance_policy [
+	IFLA_BRIDGE_MRP_INSTANCE_RING_ID	nlattr[IFLA_BRIDGE_MRP_INSTANCE_RING_ID, int32[0:2]]
+	IFLA_BRIDGE_MRP_INSTANCE_P_IFINDEX	nlattr[IFLA_BRIDGE_MRP_INSTANCE_P_IFINDEX, ifindex]
+	IFLA_BRIDGE_MRP_INSTANCE_S_IFINDEX	nlattr[IFLA_BRIDGE_MRP_INSTANCE_S_IFINDEX, ifindex]
+	IFLA_BRIDGE_MRP_INSTANCE_PRIO		nlattr[IFLA_BRIDGE_MRP_INSTANCE_PRIO, flags[mrp_instance_priorities, int16]]
+] [varlen]
+
+# TODO: I found only one here, but the fuzzer tries random values right? Or should I add 1,2,4.. etc?
+mrp_instance_priorities = MRP_DEFAULT_PRIO
+
+br_mrp_port_state_policy [
+	IFLA_BRIDGE_MRP_PORT_STATE_STATE	nlattr[IFLA_BRIDGE_MRP_PORT_STATE_STATE, flags[br_mrb_port_states, int32]]
+] [varlen]
+
+br_mrp_port_role_policy [
+	IFLA_BRIDGE_MRP_PORT_ROLE_ROLE	nlattr[IFLA_BRIDGE_MRP_PORT_ROLE_ROLE, flags[br_mrb_port_roles, int32]]
+] [varlen]
+
+br_mrp_ring_state_policy [
+	IFLA_BRIDGE_MRP_RING_STATE_RING_ID	nlattr[IFLA_BRIDGE_MRP_RING_STATE_RING_ID, int32[0:2]]
+	IFLA_BRIDGE_MRP_RING_STATE_STATE	nlattr[IFLA_BRIDGE_MRP_RING_STATE_STATE, flags[br_mrp_ring_state_states, int32]]
+] [varlen]
+
+br_mrp_ring_role_policy [
+	IFLA_BRIDGE_MRP_RING_ROLE_RING_ID	nlattr[IFLA_BRIDGE_MRP_RING_ROLE_RING_ID, int32[0:2]]
+	IFLA_BRIDGE_MRP_RING_ROLE_ROLE		nlattr[IFLA_BRIDGE_MRP_RING_ROLE_ROLE, flags[br_mrb_ring_roles, int32]]
+] [varlen]
+
+br_mrp_start_test_policy [
+# TODO define the ints better:
+	IFLA_BRIDGE_MRP_START_TEST_RING_ID	nlattr[IFLA_BRIDGE_MRP_START_TEST_RING_ID, int32[0:2]]
+	IFLA_BRIDGE_MRP_START_TEST_INTERVAL	nlattr[IFLA_BRIDGE_MRP_START_TEST_INTERVAL, int32]
+	IFLA_BRIDGE_MRP_START_TEST_MAX_MISS	nlattr[IFLA_BRIDGE_MRP_START_TEST_MAX_MISS, int32]
+	IFLA_BRIDGE_MRP_START_TEST_PERIOD	nlattr[IFLA_BRIDGE_MRP_START_TEST_PERIOD, int32]
+	IFLA_BRIDGE_MRP_START_TEST_MONITOR	nlattr[IFLA_BRIDGE_MRP_START_TEST_MONITOR, void]
+] [varlen]
+
+br_mrb_port_roles = BR_MRP_PORT_ROLE_PRIMARY, BR_MRP_PORT_ROLE_SECONDARY
+br_mrb_port_states = BR_MRP_PORT_STATE_FORWARDING, BR_MRP_PORT_STATE_BLOCKED, BR_MRP_PORT_STATE_DISABLED, BR_MRP_PORT_STATE_NOT_CONNECTED
+br_mrp_ring_state_states = BR_MRP_RING_STATE_OPEN, BR_MRP_RING_STATE_CLOSED
+br_mrb_ring_roles = BR_MRP_RING_ROLE_DISABLED, BR_MRP_RING_ROLE_MRC, BR_MRP_RING_ROLE_MRM, BR_MRP_RING_ROLE_MRA
 
 inet6_af_policy [
 	IFLA_INET6_ADDR_GEN_MODE	nlattr[IFLA_INET6_ADDR_GEN_MODE, int8]
