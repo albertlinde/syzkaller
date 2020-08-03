@@ -41,6 +41,25 @@ socket$nl_route(domain const[AF_NETLINK], type const[SOCK_RAW], proto const[NETL
 
 sendmsg$nl_route(fd sock_nl_route, msg ptr[in, msghdr_netlink[netlink_msg_route]], f flags[send_flags])
 
+sendmsg$temp(fd sock_nl_route, msg ptr[in, msghdr_netlink[netlink_msg_temp]], f flags[send_flags])
+
+netlink_msg_temp [
+	newlink		netlink_msg[RTM_NEWLINK, ifinfomsg[AF_UNSPEC], ifla_policy]
+	getlink		netlink_msg[RTM_GETLINK, ifinfomsg[AF_UNSPEC], ifla_policy]
+	setlink		netlink_msg[RTM_SETLINK, ifinfomsg[AF_UNSPEC], ifla_policy]
+
+	new_nexthop		netlink_msg[RTM_NEWNEXTHOP, nhmsg[AF_UNSPEC], rtm_nh_policy]
+	del_nexthop		netlink_msg[RTM_DELNEXTHOP, nhmsg[AF_UNSPEC], rtm_nh_policy]
+	get_nexthop		netlink_msg[RTM_GETNEXTHOP, nhmsg[AF_UNSPEC], rtm_nh_policy]
+	ipv4_new_nexthop	netlink_msg[RTM_NEWNEXTHOP, nhmsg[AF_INET], rtm_nh_policy]
+	ipv4_get_nexthop	netlink_msg[RTM_GETNEXTHOP, nhmsg[AF_INET], rtm_nh_policy]
+	ipv6_new_nexthop	netlink_msg[RTM_NEWNEXTHOP, nhmsg[AF_INET6], rtm_nh_policy]
+	ipv6_get_nexthop	netlink_msg[RTM_GETNEXTHOP, nhmsg[AF_INET6], rtm_nh_policy]
+
+	bridge_setlink	netlink_msg[RTM_SETLINK, ifinfomsg[AF_BRIDGE], ifla_policy]
+	bridge_getlink	netlink_msg[RTM_SETLINK, ifinfomsg[AF_BRIDGE], ifla_policy]
+] [varlen]
+
 netlink_msg_route [
 	newlink			netlink_msg[RTM_NEWLINK, ifinfomsg[AF_UNSPEC], ifla_policy]
 	getlink			netlink_msg[RTM_GETLINK, ifinfomsg[AF_UNSPEC], ifla_policy]
@@ -209,7 +228,6 @@ type if_stats_msg[FAMILY] {
 type nhmsg[FAMILY] {
 	nh_family	const[FAMILY, int8]
 	nh_scope	flags[rt_scope_t, int8]
-# NOT SURE ON THIS ONE:
 	nh_protocol	flags[rtm_protocol, int8]
 	resvd		const[0, int8]
 	nh_flags	flags[nh_flags, int32]
@@ -282,7 +300,7 @@ br_mrp_policy [
 ] [varlen]
 
 br_mrp_instance_policy [
-	IFLA_BRIDGE_MRP_INSTANCE_RING_ID	nlattr[IFLA_BRIDGE_MRP_INSTANCE_RING_ID, int32[0:2]]
+	IFLA_BRIDGE_MRP_INSTANCE_RING_ID	nlattr[IFLA_BRIDGE_MRP_INSTANCE_RING_ID, int32[1:1]]
 	IFLA_BRIDGE_MRP_INSTANCE_P_IFINDEX	nlattr[IFLA_BRIDGE_MRP_INSTANCE_P_IFINDEX, ifindex]
 	IFLA_BRIDGE_MRP_INSTANCE_S_IFINDEX	nlattr[IFLA_BRIDGE_MRP_INSTANCE_S_IFINDEX, ifindex]
 	IFLA_BRIDGE_MRP_INSTANCE_PRIO		nlattr[IFLA_BRIDGE_MRP_INSTANCE_PRIO, flags[mrp_instance_priorities, int16]]
@@ -300,18 +318,18 @@ br_mrp_port_role_policy [
 ] [varlen]
 
 br_mrp_ring_state_policy [
-	IFLA_BRIDGE_MRP_RING_STATE_RING_ID	nlattr[IFLA_BRIDGE_MRP_RING_STATE_RING_ID, int32[0:2]]
+	IFLA_BRIDGE_MRP_RING_STATE_RING_ID	nlattr[IFLA_BRIDGE_MRP_RING_STATE_RING_ID, int32[1:1]]
 	IFLA_BRIDGE_MRP_RING_STATE_STATE	nlattr[IFLA_BRIDGE_MRP_RING_STATE_STATE, flags[br_mrp_ring_state_states, int32]]
 ] [varlen]
 
 br_mrp_ring_role_policy [
-	IFLA_BRIDGE_MRP_RING_ROLE_RING_ID	nlattr[IFLA_BRIDGE_MRP_RING_ROLE_RING_ID, int32[0:2]]
+	IFLA_BRIDGE_MRP_RING_ROLE_RING_ID	nlattr[IFLA_BRIDGE_MRP_RING_ROLE_RING_ID, int32[1:1]]
 	IFLA_BRIDGE_MRP_RING_ROLE_ROLE		nlattr[IFLA_BRIDGE_MRP_RING_ROLE_ROLE, flags[br_mrb_ring_roles, int32]]
 ] [varlen]
 
 br_mrp_start_test_policy [
 # TODO define the ints better:
-	IFLA_BRIDGE_MRP_START_TEST_RING_ID	nlattr[IFLA_BRIDGE_MRP_START_TEST_RING_ID, int32[0:2]]
+	IFLA_BRIDGE_MRP_START_TEST_RING_ID	nlattr[IFLA_BRIDGE_MRP_START_TEST_RING_ID, int32[1:1]]
 	IFLA_BRIDGE_MRP_START_TEST_INTERVAL	nlattr[IFLA_BRIDGE_MRP_START_TEST_INTERVAL, int32]
 	IFLA_BRIDGE_MRP_START_TEST_MAX_MISS	nlattr[IFLA_BRIDGE_MRP_START_TEST_MAX_MISS, int32]
 	IFLA_BRIDGE_MRP_START_TEST_PERIOD	nlattr[IFLA_BRIDGE_MRP_START_TEST_PERIOD, int32]
@@ -930,7 +948,7 @@ br_mdb_entry_sub_u [
 ]
 
 rtm_nh_policy [
-	NHA_ID		nlattr[NHA_ID, int32[0:4]]
+	NHA_ID		nlattr[NHA_ID, int32[1:1]]
 	NHA_GROUP	nlattr[NHA_GROUP, array[nexthop_grp]]
 	NHA_GROUP_TYPE	nlattr[NHA_GROUP_TYPE, flags[nha_group_types, int16]]
 	NHA_BLACKHOLE	nlattr[NHA_BLACKHOLE, void]
@@ -940,12 +958,12 @@ rtm_nh_policy [
 	NHA_ENCAP	nlnest[NHA_ENCAP, lwtunnel_policy]
 	NHA_GROUPS	nlattr[NHA_GROUPS, void]
 # NOT SURE ON THIS ONE:
-	NHA_MASTER	nlattr[NHA_MASTER, int32[0:4]]
+	NHA_MASTER	nlattr[NHA_MASTER, int32[1:1]]
 	NHA_FDB		nlattr[NHA_FDB, void]
 ] [varlen]
 
 nexthop_grp {
-	id	int32[0:4]
+	id	int32[1:1]
 	weight	int8[0:254]
 	resvd1	const[0, int8]
 	resvd2	const[0, int16]
